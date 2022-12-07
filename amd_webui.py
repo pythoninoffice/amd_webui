@@ -8,6 +8,7 @@ import pathlib
 import importlib.util
 import numpy as np
 import random
+import datetime
 #from modules import txt2img
 
 
@@ -15,9 +16,11 @@ python = sys.executable
 #repositories = pathlib.Path().absolute() / 'repositories'
 
 onnx_dir = pathlib.Path().absolute()/'onnx_models'
+output_dir = pathlib.Path().absolute()/'output'
 
+if not output_dir.exists():
+        output_dir.mkdir(parents=True, exist_ok=True)
 #from PIL import Image
-
 #baseImage = Image.open(r"in.jpg").convert("RGB") # opens an image directly from the script's location and converts to RGB color profile
 #baseImage = baseImage.resize((768,512))
 
@@ -48,11 +51,14 @@ def txt2img(prompt, negative_prompt, steps, height, width, scale, denoise_streng
                 guidance_scale=scale,
                 #strength=denoise_strength,
                 generator = generator,
-                num_images_per_prompt = num_image,
+                num_images_per_prompt = num_image
+                
                 ).images[0]
+    
+    ## autosave img
+    img_name = datetime.datetime.now().strftime('%Y-%m-%d-%H-%M') + ".png"
+    image.save(output_dir/img_name)
     return image
-
-#image.save("t2i.png")
 
 def img2img(prompt, negative_prompt, image_input, steps, height, width, scale, denoise_strength, seed=None, scheduler=None, num_image=None):
     
@@ -67,17 +73,22 @@ def img2img(prompt, negative_prompt, image_input, steps, height, width, scale, d
         
     generator = np.random.RandomState(seed)
     
-    image = pipe(prompt,
-                init_image = image_input,
+    image = pipe_img2img(prompt,
+                image = image_input,
                 strength=denoise_strength,
                 num_inference_steps=steps,
                 guidance_scale=scale,
                 negative_prompt = negative_prompt,
                 num_images_per_prompt = num_image,
                 generator = generator,
-                height = height,
-                width = width
+                #height = height,
+                #width = width
                 ).images[0]
+    
+    ## autosave img
+    img_name = datetime.datetime.now().strftime('%Y-%m-%d-%H-%M') + ".png"
+    image.save(output_dir/img_name)
+    
     return image
     
     
@@ -149,7 +160,8 @@ def load_onnx_model(model):
 ##    subprocess.run('echo installing onnx nightly built', shell=True)
     global pipe
     pipe = OnnxStableDiffusionPipeline.from_pretrained(str(onnx_dir/model),
-                                                   provider="DmlExecutionProvider")
+                                                       safety_checker = None,
+                                                       provider="DmlExecutionProvider")
     
     return 'model ready'
 
@@ -160,10 +172,11 @@ def load_onnx_model_i2i(model):
 ##    onnx_nightly = pathlib.Path().absolute()/'repositories/ort_nightly_directml-1.13.0.dev20220908001-cp39-cp39-win_amd64.whl'
 ##    pip_install(str(onnx_nightly))
 ##    subprocess.run('echo installing onnx nightly built', shell=True)
-    global pipe
-    pipe = OnnxStableDiffusionImg2ImgPipeline.from_pretrained(str(onnx_dir/model),
-                                                                  provider="DmlExecutionProvider")
-    
+    global pipe_img2img
+    pipe_img2img = OnnxStableDiffusionImg2ImgPipeline.from_pretrained(str(onnx_dir/model),
+                                                              safety_checker = None,
+                                                              provider="DmlExecutionProvider")
+    print(pipe_img2img)
     return 'model ready'
 
 
@@ -255,7 +268,7 @@ def start_app():
         
         #load_onnx_model_button.click(load_onnx_model, inputs=txt2img_model_input, show_progress=True, outputs = test_output)
         txt2img_model_input.change(load_onnx_model, inputs=txt2img_model_input, show_progress=True, outputs = test_output)
-        img2img_model_input.change(load_onnx_model, inputs=img2img_model_input, show_progress=True, outputs = img2img_test_output)
+        img2img_model_input.change(load_onnx_model_i2i, inputs=img2img_model_input, show_progress=True, outputs = img2img_test_output)
 
     app.launch(inbrowser = True)
 
