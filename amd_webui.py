@@ -9,6 +9,7 @@ import importlib.util
 import numpy as np
 import random
 import datetime
+from PIL import Image
 #from modules import txt2img
 
 
@@ -72,9 +73,9 @@ def img2img(prompt, negative_prompt, image_input, steps, height, width, scale, d
     print(f'this is the seed {seed}')
         
     generator = np.random.RandomState(seed)
-    
-    image = pipe_img2img(prompt,
-                image = image_input,
+    print(image_input)
+    image = pipe_img2img(prompt=prompt,
+                image = Image.fromarray(image_input),
                 strength=denoise_strength,
                 num_inference_steps=steps,
                 guidance_scale=scale,
@@ -90,12 +91,7 @@ def img2img(prompt, negative_prompt, image_input, steps, height, width, scale, d
     image.save(output_dir/img_name)
     
     return image
-    
-    
-    
-                                                                                  
-                                                                                  
-    pass
+
 
 def huggingface_login(token):
     try:
@@ -128,7 +124,7 @@ def is_installed(lib):
 
 def download_sd_model(model_path):
     pip_install('onnx')
-    from repositories.diffusers.scripts import convert_stable_diffusion_checkpoint_to_onnx
+    from src.diffusers.scripts import convert_stable_diffusion_checkpoint_to_onnx
     onnx_opset = 14
     onnx_fp16 = False
     try:
@@ -176,7 +172,6 @@ def load_onnx_model_i2i(model):
     pipe_img2img = OnnxStableDiffusionImg2ImgPipeline.from_pretrained(str(onnx_dir/model),
                                                               safety_checker = None,
                                                               provider="DmlExecutionProvider")
-    print(pipe_img2img)
     return 'model ready'
 
 
@@ -216,7 +211,8 @@ def start_app():
             img2img_negative_prompt_input = gr.Textbox(label='Negative Prompt')
             with gr.Row():
                 img2img_image_input = gr.Image()
-                img2img_image_output = gr.Image()
+                
+                img2img_image_output = gr.Image(label='img2img output')
             with gr.Row():
                     img2img_model_input = gr.Dropdown(label='Select a model', choices = display_onnx_models())
                     img2img_test_output = gr.Textbox(label='testing output')
