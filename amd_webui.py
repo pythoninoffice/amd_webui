@@ -177,7 +177,7 @@ def load_onnx_model_i2i(model):
 
 def start_app():
     with gr.Blocks() as app:
-        gr.Markdown('SATBLE DIFFUSION WEBUI FOR AMD')
+        gr.Markdown('STABLE DIFFUSION WEBUI FOR AMD')
         with gr.Tab('txt2img'):
             txt2img_prompt_input = gr.Textbox(label='Prompt')
             txt2img_negative_prompt_input = gr.Textbox(label='Negative Prompt')
