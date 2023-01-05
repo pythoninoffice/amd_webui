@@ -34,15 +34,13 @@ set /p setdata= :
 %PYTHON% -c '' >tmp/webset.txt
 echo %setdata% >> tmp/webset.txt
 
-if %setdata% == %Data% (
+if %setdata% == 1 (
+	Powershell -Command "(Get-Content venv/Lib/site-packages/gradio/networking.py).replace('0.0.0.0', '127.0.0.1') | Set-Content venv/Lib/site-packages/gradio/networking.py"
 ) else (
-	if %setdata% == 1 (
-		Powershell -Command "(Get-Content venv/Lib/site-packages/gradio/networking.py).replace('0.0.0.0', '127.0.0.1') | Set-Content venv/Lib/site-packages/gradio/networking.py"
-	) else (
-		Powershell -Command "(Get-Content venv/Lib/site-packages/gradio/networking.py).replace('127.0.0.1', '0.0.0.0') | Set-Content venv/Lib/site-packages/gradio/networking.py"
-	)
-	
+	Powershell -Command "(Get-Content venv/Lib/site-packages/gradio/networking.py).replace('127.0.0.1', '0.0.0.0') | Set-Content venv/Lib/site-packages/gradio/networking.py"
 )
+	
+
 exit /b
 
 :: Made by SimolZimol#5242
