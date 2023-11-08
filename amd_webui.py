@@ -2,6 +2,7 @@ import gradio as gr
 from diffusers import OnnxStableDiffusionPipeline, OnnxStableDiffusionImg2ImgPipeline
 from huggingface_hub import _login
 from huggingface_hub.hf_api import HfApi, HfFolder
+from diffusers.schedulers import DDIMScheduler, LMSDiscreteScheduler, PNDMScheduler
 import subprocess
 import sys
 import pathlib
@@ -10,6 +11,11 @@ import numpy as np
 import random
 import datetime
 from PIL import Image
+import onnxruntime
+import pprint
+pprint.pprint(onnxruntime.get_available_providers())
+
+
 #from modules import txt2img
 
 
@@ -30,9 +36,10 @@ prompt = "A fantasy landscape, trending on artstation"
 #scale = 7.5
 #pipe = None
 ##need to set up UI for downloading weights
+lms = LMSDiscreteScheduler(beta_start=0.00085, beta_end=0.012, beta_schedule="scaled_linear", steps_offset=1)
 
 
-def txt2img(prompt, negative_prompt, steps, height, width, scale, denoise_strength=0, seed=None, scheduler=None, num_image=None):
+def txt2img(prompt, negative_prompt, steps, height, width, scale, denoise_strength=0, seed=None, scheduler=lms, num_image=None):
     try:
         seed = int(seed)
         if seed < 0:
@@ -42,8 +49,6 @@ def txt2img(prompt, negative_prompt, steps, height, width, scale, denoise_streng
         
     generator = np.random.RandomState(seed)
         
-    #generator = torch.Generator(device='cpu')
-    #generator = generator.manual_seed(seed)
     image = pipe(prompt,
                 negative_prompt = negative_prompt,
                 num_inference_steps=steps,
@@ -105,7 +110,7 @@ def huggingface_login(token):
 
 def pip_install(lib):
     subprocess.run(f'echo Installing {lib}...', shell=True)
-    if 'ort_nightly_directml' in lib:
+    if 'onnxruntime-directml' in lib:
         subprocess.run(f'echo 1', shell=True)
         subprocess.run(f'echo "{python}" -m pip install {lib}', shell=True)
         subprocess.run(f'"{python}" -m pip install {lib} --force-reinstall', shell=True)
@@ -124,7 +129,9 @@ def is_installed(lib):
 
 def download_sd_model(model_path):
     pip_install('onnx')
-    from src.diffusers.scripts import convert_stable_diffusion_checkpoint_to_onnx
+    print('abc')
+    from conv import convert_models
+    print('ttt')
     onnx_opset = 14
     onnx_fp16 = False
     try:
@@ -135,7 +142,7 @@ def download_sd_model(model_path):
     if not onnx_dir.exists():
         onnx_dir.mkdir(parents=True, exist_ok=True)
         print(model_name)
-    convert_stable_diffusion_checkpoint_to_onnx.convert_models(model_path, str(onnx_model_dir), onnx_opset, onnx_fp16)
+    convert_models(model_path, str(onnx_model_dir), onnx_opset, onnx_fp16)
     pip_uninstall('onnx')
 
     
@@ -156,8 +163,9 @@ def load_onnx_model(model):
 ##    subprocess.run('echo installing onnx nightly built', shell=True)
     global pipe
     pipe = OnnxStableDiffusionPipeline.from_pretrained(str(onnx_dir/model),
-                                                       safety_checker = None,
-                                                       provider="DmlExecutionProvider")
+                                                        safety_checker = None,
+                                                       provider="DmlExecutionProvider",
+                                                       )
     
     return 'model ready'
 
