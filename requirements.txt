@@ -1,11 +1,17 @@
+gradio
 ftfy==6.1.1
-gradio==3.12.0
--e git+https://github.com/huggingface/diffusers@daebee0963d2b39fb3fa9532ab271a91674c4070#egg=diffusers
-huggingface-hub==0.11.1
-numpy==1.23.5
-onnxruntime==1.13.1
+diffusers==0.21.4
+numpy
+onnxruntime==1.15.1
+huggingface-hub==0.16.4
 scipy==1.9.3
 torch==1.13.0
 transformers==4.25.1
-
-
+Accelerate==0.15.0
+nest-asyncio==1.5.6 
+discord.py
+argparse
+pytest-shutil
+pathlib
+onnx
+packaging

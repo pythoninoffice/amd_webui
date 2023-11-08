@@ -1,3 +1,5 @@
+# Made by https://github.com/pythoninoffice
+#adjusted by SimolZimol
 import importlib.util
 import platform
 import subprocess
@@ -6,26 +8,26 @@ import pathlib
 import time
 
 
+
 python = sys.executable
 if sys.version[:4] == "3.10":
-    onnx_nightly = 'ort_nightly_directml-1.13.0.dev20220908001-cp310-cp310-win_amd64.whl'
+    onnx_nightly = 'ort_nightly_directml-1.16.0.dev20230915012-cp310-cp310-win_amd64.whl'
 elif sys.version[:3] == "3.9":
-    onnx_nightly = 'ort_nightly_directml-1.13.0.dev20220908001-cp39-cp39-win_amd64.whl'
+    onnx_nightly = 'ort_nightly_directml-1.16.0.dev20230919002-cp39-cp39-win_amd64.whl'
 elif sys.version[:3] == "3.8":
-    onnx_nightly = 'ort_nightly_directml-1.13.0.dev20220908001-cp38-cp38-win_amd64.whl'
-elif sys.version[:3] == "3.7":
-    onnx_nightly = 'ort_nightly_directml-1.13.0.dev20220908001-cp37-cp37-win_amd64.whl'
+    onnx_nightly = 'ort_nightly_directml-1.16.0.dev20230919002-cp38-cp38-win_amd64.whl'
+elif sys.version[:3] == "3.11":
+    onnx_nightly = 'ort_nightly_directml-1.16.0.dev20230919002-cp311-cp311-win_amd64.whl'
 else:
-    print('no support python version found, install any of the 3.7, 3.8, 3.9, or 3.10!')
+    print('no support python version found, install any of the 3.8, 3.9, 3.10 or 3.11!')
 print(f'You are using python version - {sys.version}')
 
-
-
-required_lib = ['torch', 'onnxruntime', 'transformers', 'scipy', 'ftfy', 'gradio']
+required_lib = ['torch', 'onnxruntime', 'transformers', 'scipy', 'ftfy', 'discord.py']
 standard_onnx = 'onnx'
 repositories = pathlib.Path().absolute() / 'repositories'
 git_repos = ['https://github.com/huggingface/diffusers']
 requirements = pathlib.Path().absolute()  /'requirements.txt'
+
 
 
 def pip_install(lib):
@@ -33,6 +35,7 @@ def pip_install(lib):
     subprocess.run(f'echo "{python}" -m pip install {lib}', shell=True)
     subprocess.run(f'"{python}" -m pip install {lib}', shell=True, capture_output=True)
     subprocess.run(f'"{python}" -m pip install {lib}', shell=True, capture_output=True)
+
 
 def pip_install_requirements():
     subprocess.run(f'echo installing requirements', shell=True)
@@ -63,8 +66,6 @@ def git_clone(repo_url, repo_name):
 pip_install_requirements()
 subprocess.run(f'"{python}" -m pip install repositories/{onnx_nightly}', shell=True)
 subprocess.run('echo Done installing', shell=True)
-
-
 
 import amd_webui
 amd_webui.start_app()

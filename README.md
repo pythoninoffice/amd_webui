@@ -1,7 +1,7 @@
 # amd_webui
 ## System Requirements
 - AMD GPU with at least 8GB VRAM
-- One of: Python 3.7, 3.8, 3.9, or 3.10 | Download from https://www.python.org/
+- One of: Python 3.8, 3.9, 3.10 or 3.11 | Download from https://www.python.org/
 - Git | Download from https://git-scm.com/downloads
 
 ## How To Install
